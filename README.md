@@ -12,3 +12,7 @@ https://www.elecrow.com/display/esp-hmi-display/esp32-hmi-display.html
 
 https://www.elecrow.com/wiki/esp32-display-502727-intelligent-touch-screen-wi-fi26ble-800480-hmi-display.html
 
+Code was developed using many of the examples available on esphome.io , lots of trial and error and claude.ai
+
+https://esphome.io/cookbook/lvgl/
+
