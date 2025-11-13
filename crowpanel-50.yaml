@@ -1,0 +1,122 @@
+esphome:
+  name: crowpanel-50
+  friendly_name: CrowPanel 5.0
+  platformio_options:
+    build_flags: "-DBOARD_HAS_PSRAM"
+    board_build.esp-idf.memory_type: qio_opi
+    board_build.flash_mode: dio
+
+esp32:
+  board: esp32s3box
+  framework:
+    type: esp-idf
+    sdkconfig_options:
+      CONFIG_ESP32S3_DEFAULT_CPU_FREQ_240: y
+      CONFIG_ESP32S3_DATA_CACHE_64KB: y
+      CONFIG_SPIRAM_FETCH_INSTRUCTIONS: y
+      CONFIG_SPIRAM_RODATA: y
+
+psram:
+  mode: octal
+  speed: 80MHz
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "l3Rxoac4igKCdUGSXGhopj/VXoiHJ72/Snl3zAySNTA="
+  on_client_connected:
+    - if:
+        condition:
+          lambda: 'return (0 == client_info.find("Home Assistant "));'
+        then:
+          - lvgl.widget.show: lbl_hastatus
+  on_client_disconnected:
+    - if:
+        condition:
+          lambda: 'return (0 == client_info.find("Home Assistant "));'
+        then:
+          - lvgl.widget.hide: lbl_hastatus
+
+ota:
+  - platform: esphome
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  power_save_mode: none  # Critical for ESP32-S3 stability from Claude
+  fast_connect: true     # Speeds up reconnection from Claude
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Crowpanel-50 Fallback Hotspot"
+    password: !secret ap_password
+
+captive_portal:
+
+
+#"color": {
+#  1: "#FAFAFA", white
+#  2: "#F5F5F5",
+#  3: "#EEEEEE",
+#  4: "#E0E0E0",
+#  5: "#BDBDBD",
+#  6: "#9E9E9E",
+#  7: "#757575",
+#  8: "#616161", GREY
+#  9: "#424242",
+#  10: "#212121" black
+substitutions:
+  # Color Palette
+  color_white: "0xFAFAFA"
+  color_light_grey: "0xE0E0E0"
+  color_grey: "0x757575"
+  color_dark_grey: "0x616161"
+  color_darker_grey: "0x424242"
+  color_black: "0x212121"
+  color_green: "0x66BB6A"
+  color_red: "0xEF5350"
+  color_orange: "0xFF6F00"
+  color_amber: "0xFFA000"
+  color_blue: "0x1E90FF"
+  color_orange_red: "0xFF4500"
+
+
+font: !include crowpanel-50/fonts.yaml
+<<: !include crowpanel-50/all_sensors.yaml
+<<: !include crowpanel-50/all_display.yaml
+
+lvgl:
+  <<: !include crowpanel-50/lvgl_theme.yaml
+  top_layer: !include crowpanel-50/lvgl_header.yaml
+  pages: !include crowpanel-50/lvgl_pages.yaml
+
+
+#
+# DATA FROM HOMEASSISTANT
+#
+# Sync time with Home Assistant.
+time:
+  - platform: homeassistant
+    id: homeassistant_time
+    on_time: 
+      minutes: /1
+      then: 
+        - lvgl.label.update:
+            id: lbl_clock 
+            text: !lambda |-
+              static char buf[64];
+              auto time = id(homeassistant_time).now();
+              if (!time.is_valid()) {
+                return "Loading...";
+              }
+              time.strftime(buf, sizeof(buf), "%a, %b %d\n%H:%M");
+              return buf;
+
+
+
+
+
+
