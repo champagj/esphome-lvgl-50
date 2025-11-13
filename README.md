@@ -1,4 +1,4 @@
-# esphome-lvgl-50
+# LVGL Display - ESPHome for Home Assistant
 Home Assistant Dashboard on ESP32-S3 LVGL display using ESPHome.
 
 This code is designed to run on an LVGL Display via ESPHome for Home Assistant. 
