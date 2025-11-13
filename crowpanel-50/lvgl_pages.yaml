@@ -1,0 +1,426 @@
+############################################## PAGE 1 #####################################################    
+    - id: main_page
+      bg_color: 0x212121
+      widgets:
+        - obj:
+            align: TOP_MID
+            styles: header_footer
+            widgets:
+              - label:
+                  text: "Home Assistant"
+                  align: CENTER
+                  text_align: CENTER
+        #
+        #  AWAY BUTTON
+        #
+        - button:
+            id: away
+            x: 25
+            y: 50
+            checkable: false
+            widgets:
+              - label:
+                  align: CENTER
+                  text: "AWAY"
+            on_click:
+              - homeassistant.action:
+                  action: script.crowpanel_away
+              - logger.log: Away Button Pushed
+
+        #
+        #  BUTTON LIGHTS ON
+        #
+        - button:
+            id: lights_off
+            x: 25
+            y: 150
+            checkable: false
+            widgets:
+              - label:
+                  align: CENTER
+                  text: "LIGHTS ON"
+            on_click:
+              - homeassistant.action:
+                  action: script.crowpanel_lightson
+              - logger.log: Test
+        #
+        #   BUTTON LIGHTS OFF
+        #
+        - button:
+            id: test
+            x: 25
+            y: 250
+            widgets:
+              - label:
+                  align: CENTER
+                  text: "LIGHTS OFF"
+            on_click:
+              - homeassistant.action:
+                  action: script.crowpanel_lightsoff
+              - logger.log: Lights Off Button Pushed
+        #
+        #   BUTTON GARAGE DOOR
+        #
+        - button:
+            id: garage_door
+            x: 25
+            y: 350
+            widgets:
+              - label:
+                  id: lbl_garage_door
+                  align: LEFT_MID
+                  text_font: icons_50
+                  text_color: ${color_red}
+                  text: "\U000F12D3" 
+              - label:
+                  align: TOP_RIGHT
+                  text: "Garage Door"
+                  id: lbl_garage_obstruction
+              - label:
+                  align: BOTTOM_RIGHT
+                  text: "Unknown"
+                  id: lbl_garage_status
+            on_click:
+              - homeassistant.action:
+                  action: script.crowpanel_garage_door
+
+################################################################################
+        #
+        #          STATUS GRID - CENTER COLUMN
+        #
+        - obj:
+            x: 275
+            y: 50
+            width: 250
+            height: 250
+            pad_all: 10
+            styles: style_grid
+            layout:
+              pad_column: 0
+              type: GRID
+              grid_rows: [ FR(20), FR(20), FR(20), FR(20)]
+              grid_columns: [FR(40), FR(60)]
+            widgets:
+              # DOORS #############
+              - label:
+                  id: lbl_status_doors_icon
+                  text_font: icons_50
+                  text_color: ${color_red}
+                  text: "\U000F181E" 
+                  grid_cell_row_pos: 0
+                  grid_cell_column_pos: 0
+                  grid_cell_x_align: STRETCH
+                  grid_cell_y_align: CENTER
+              - label:
+                  id: lbl_status_doors
+                  text: "Loading.." 
+                  grid_cell_row_pos: 0
+                  grid_cell_column_pos: 1
+                  #grid_cell_column_span: 2
+                  grid_cell_x_align: STRETCH
+                  grid_cell_y_align: CENTER
+              # LIGHTS STATUS #######################################
+              - label:
+                  id: lbl_light_icon
+                  text_font: icons_50
+                  text_color: ${color_green}
+                  text: "\U000F0336" 
+                  grid_cell_row_pos: 1
+                  grid_cell_column_pos: 0
+                  grid_cell_x_align: STRETCH
+                  grid_cell_y_align: CENTER
+              - label:
+                  id: lbl_lights_on
+                  text: "Loading.." 
+                  grid_cell_row_pos: 1
+                  grid_cell_column_pos: 1
+                  #grid_cell_column_span: 2
+                  grid_cell_x_align: STRETCH
+                  grid_cell_y_align: CENTER
+              # MODE   ####################################    
+              - label:
+                  id: lbl_mode_icon
+                  text_font: icons_50
+                  text_color: ${color_red}
+                  text: "\U000F1B50" 
+                  grid_cell_row_pos: 2
+                  grid_cell_column_pos: 0
+                  grid_cell_x_align: STRETCH
+                  grid_cell_y_align: CENTER                  
+              - label:
+                  id: lbl_mode
+                  text: " Loading..." 
+                  grid_cell_row_pos: 2
+                  grid_cell_column_pos: 1
+                  grid_cell_x_align: STRETCH
+                  grid_cell_y_align: CENTER
+              # GARBAGE AND RECYCLING   ####              
+              - label:
+                  id: lbl_garbage_icon
+                  text_font: icons_50
+                  text_color: ${color_green}
+                  text: "\U000F0A9E" 
+                  grid_cell_row_pos: 3
+                  grid_cell_column_pos: 0
+                  grid_cell_x_align: STRETCH
+                  grid_cell_y_align: CENTER                  
+              - label:
+                  id: lbl_garbage
+                  text_color: ${color_green}
+                  text: "" 
+                  grid_cell_row_pos: 3
+                  grid_cell_column_pos: 1
+                  #grid_cell_column_span: 2
+                  grid_cell_x_align: STRETCH
+                  grid_cell_y_align: CENTER
+
+        #
+        # THERMOSTAT TABLE BOTTOM CENTER
+        #
+        - obj:
+            x: 275
+            y: 315
+            width: 250
+            height: 115
+            pad_all: 10
+            styles: style_grid
+            layout:
+              type: GRID
+              grid_rows: [FR(60), FR(40) ]
+              grid_columns: [FR(25), FR(75)]
+            widgets:
+              - label:
+                  id: lbl_climate_current_color
+                  text: "\U000F050F"
+                  text_font: icons_100
+                  text_align: LEFT
+                  grid_cell_row_pos: 0
+                  grid_cell_column_pos: 0
+                  grid_cell_row_span: 2
+                  grid_cell_x_align: CENTER
+                  grid_cell_y_align: START
+
+              - label:
+                  text: "Unknown"
+                  id: lbl_climate_current
+                  text_align: RIGHT
+                  grid_cell_row_pos: 0
+                  grid_cell_column_pos: 1
+                  grid_cell_x_align: STRETCH
+              - label:
+                  text: " "
+                  id: lbl_climate_hvac
+                  text_align: RIGHT
+                  grid_cell_row_pos: 1
+                  grid_cell_column_pos: 1
+                  grid_cell_x_align: STRETCH
+##################################################################################
+        #
+        #  CLOCK - TOP RIGHT
+        #
+        - obj:
+            x: 550
+            y: 50
+            width: 225
+            height: 80
+            pad_all: 10
+            styles: style_grid
+            widgets:
+              - label:
+                  text: ""
+                  id: lbl_clock
+                  text_font: montserrat_24
+                  text_align: CENTER
+                  align: CENTER
+        #
+        #  OCCUPANCY - MIDDLE RIGHT
+        #
+        - obj:
+            x: 550
+            y: 145
+            width: 225
+            height: 65
+            pad_all: 10
+            styles: style_grid
+            widgets:
+              - label:
+                  text_font: icons_50
+                  text_color: 0x757575
+                  text: "\U000F0CE3" 
+                  #text_align: LEFT
+                  align: LEFT_MID
+              - label:
+                  text: "loading.."
+                  id: lbl_jf_status
+                  #text_font: montserrat_24
+                  #text_align: RIGHT
+                  align: RIGHT_MID
+
+        #
+        # WEATHER TABLE
+        #
+        - obj:
+            x: 550
+            y: 220
+            width: 225
+            height: 215
+            pad_all: 10
+            styles: style_grid
+            layout:
+              pad_column: 0
+              type: GRID
+              grid_rows: [FR(48), FR(20), FR(13), FR(13), FR(13)]
+              grid_columns: [FR(10), FR(40), FR(40), FR(10)]
+            widgets:
+              - label:
+                  text: "\U000F14E4"
+                  id: lbl_weather_forecast_condition_icon
+                  text_font: icons_100
+                  text_align: CENTER
+                  grid_cell_row_pos: 0
+                  grid_cell_column_pos: 0
+                  grid_cell_column_span: 2
+                  grid_cell_x_align: START
+                  grid_cell_y_align: CENTER
+
+              - label:
+                  text: "--.- °C"
+                  id: lbl_weather_outdnoor_now
+                  text_align: CENTER
+                  text_font: montserrat_24
+                  grid_cell_row_pos: 0
+                  grid_cell_column_pos: 2
+                  grid_cell_column_span: 2
+                  grid_cell_x_align: STRETCH
+                  grid_cell_y_align: CENTER
+
+
+              - label:
+                  text: "Unknown"
+                  id: lbl_weather_forecast_condition_name
+                  text_align: LEFT
+                  grid_cell_row_pos: 1
+                  grid_cell_column_pos: 1
+                  grid_cell_column_span: 2
+                  grid_cell_x_align: STRETCH
+
+              - label:
+                  text: "Maximum:"
+                  grid_cell_row_pos: 2
+                  grid_cell_column_pos: 1
+
+              - label:
+                  text: "--.- °C"
+                  id: lbl_weather_forecast_temphi
+                  text_align: RIGHT
+                  grid_cell_row_pos: 2
+                  grid_cell_column_pos: 2
+                  grid_cell_x_align: STRETCH
+
+              - label:
+                  text: "Minimum:"
+                  grid_cell_row_pos: 3
+                  grid_cell_column_pos: 1
+
+              - label:
+                  text: "--.- °C"
+                  id: lbl_weather_forecast_templo
+                  text_align: RIGHT
+                  grid_cell_row_pos: 3
+                  grid_cell_column_pos: 2
+                  grid_cell_x_align: STRETCH
+              - label:
+                  text: " "
+                  id: lbl_weather_humidex
+                  text_align: RIGHT
+                  grid_cell_row_pos: 4
+                  grid_cell_column_pos: 1
+              - label:
+                  text: " "
+                  id: lbl_weather_humidex_number
+                  text_align: RIGHT
+                  grid_cell_row_pos: 4
+                  grid_cell_column_pos: 2
+                  grid_cell_x_align: STRETCH
+#############################################################################################################
+    - id: page_2
+      bg_color: 0x212121
+      widgets:
+        - obj:
+            align: TOP_MID
+            styles: header_footer
+            widgets:
+              - label:
+                  text: "Config"
+                  align: CENTER
+                  text_align: CENTER
+
+        #
+        #   BUTTON GUEST MODE
+        #
+        - button:
+            id: btn_guestmode
+            x: 25
+            y: 50
+            checkable: true
+            widgets:
+                - label:
+                    align: CENTER
+                    text: "GUEST MODE"
+            on_click:
+                - homeassistant.action:
+                    action: input_boolean.toggle
+                    data:
+                        entity_id: input_boolean.guestmode
+        #
+        #   BUTTON NIGHT MODE
+        #
+        - button:
+            id: btn_nightmode
+            x: 25
+            y: 150
+            checkable: true
+            widgets:
+                - label:
+                    align: CENTER
+                    text: "NIGHT MODE"
+            on_click:
+                - homeassistant.action:
+                    action: input_boolean.toggle
+                    data:
+                        entity_id: input_boolean.nightmode        
+        #
+        #   BUTTON CLEANING MODE
+        #
+        - button:
+            id: btn_cleanmode
+            x: 25
+            y: 250
+            checkable: true
+            widgets:
+                - label:
+                    align: CENTER
+                    text: "CLEAN MODE"
+            on_click:
+                - homeassistant.action:
+                    action: input_boolean.toggle
+                    data:
+                        entity_id: input_boolean.cleaningmode
+
+
+        - slider:
+            id: dimmer_slider
+            x: 300
+            y: 100
+            width: 25
+            height: 200
+            pad_all: 8
+            min_value: 25
+            max_value: 255
+            on_release:
+                - homeassistant.action:
+                    action: light.turn_on
+                    data:
+                        entity_id: light.crowpanel_50_display_backlight
+                        brightness: !lambda return int(x);
+

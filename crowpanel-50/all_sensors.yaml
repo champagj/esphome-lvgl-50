@@ -1,0 +1,320 @@
+#
+#             SENSORS
+#
+sensor:
+  - platform: homeassistant
+    id: back_light_slider
+    entity_id: light.crowpanel_50_display_backlight
+    attribute: brightness
+    filters:
+        - lambda: |-
+            if (isnan(x)) {
+            return 245.0;  // Default brightness on boot
+            }
+            return x;
+    on_value:
+        - lvgl.slider.update:
+            id: dimmer_slider
+            value: !lambda return x;
+# COUNT OF LIGHTS ON
+  - platform: homeassistant
+    entity_id: sensor.lights_on 
+    name: Count of lights
+    id: lights_on 
+    on_value: 
+      then:
+        - lvgl.label.update:
+            id: lbl_lights_on 
+            text: !lambda |-
+              int count = (int)id(lights_on).state;
+              if (count == 0) {
+                return "All lights are off";
+              } else if (count == 1) {
+                return "1 light is on";
+              } else {
+                char buffer[50];
+                snprintf(buffer, sizeof(buffer), "%d lights are on", count);
+                return std::string(buffer);
+              }
+  #  CURRENT WEATHER TEMPERATURE
+  - platform: homeassistant
+    entity_id: sensor.russell_weather_temperature
+    id: weather_temperature
+    on_value:
+      - lvgl.label.update:
+          id: lbl_weather_outdnoor_now
+          text: !lambda |-
+            char buffer[10];
+            snprintf(buffer, sizeof(buffer), "%.1f", id(weather_temperature).state);
+            return std::string(buffer) + "°C";
+  #  CURRENT WEATHER HIGH TEMPERATURE
+  - platform: homeassistant
+    entity_id: sensor.russell_weather_high_temperature
+    id: weather_high_temperature
+    on_value:
+      - lvgl.label.update:
+          id: lbl_weather_forecast_temphi
+          text: !lambda |-
+            char buffer[10];
+            snprintf(buffer, sizeof(buffer), "%.0f", id(weather_high_temperature).state);
+            return std::string(buffer) + "°C";
+  #  CURRENT WEATHER LOW TEMPERATURE
+  - platform: homeassistant
+    entity_id: sensor.russell_weather_low_temperature
+    id: weather_low_temperature
+    on_value:
+      - lvgl.label.update:
+          id: lbl_weather_forecast_templo
+          text: !lambda |-
+            char buffer[10];
+            snprintf(buffer, sizeof(buffer), "%.0f", id(weather_low_temperature).state);
+            return std::string(buffer) + "°C";
+
+#
+#             TEXT SENSORS
+#
+text_sensor:
+  # GARBAGE AND RECYCLING
+  - platform: homeassistant
+    entity_id: input_text.recycling_type
+    name: Garbage 
+    id: garbage 
+    on_value:
+      then:
+        - lvgl.label.update:
+            id: lbl_garbage
+            text: !lambda |-
+              return id(garbage).get_state();
+        - lvgl.label.update: 
+            id: lbl_garbage_icon
+            text: !lambda |-
+              std::string action = id(garbage).state;
+              if (action == "") { 
+                return "";
+              } else {
+                return "\U000F044C";
+              }
+
+  # WEATHER CONDITION
+  - platform: homeassistant
+    entity_id: sensor.russell_weather_current_condition
+    id: weather_condition
+    on_value:
+      then:
+        - lvgl.label.update:
+            id: lbl_weather_forecast_condition_name
+            text: !lambda |-
+              return id(weather_condition).get_state();
+  # HELPER WEATHER ICON FONT
+  - platform: homeassistant
+    entity_id: sensor.weather_icon_text
+    id: weather_icon
+    on_value:
+      then:
+        - lvgl.label.update:
+            id: lbl_weather_forecast_condition_icon
+            text: !lambda |-
+              return id(weather_icon).get_state();
+#  HELPER CURRENT HUMIDEX OR WINDCHILL 
+  - platform: homeassistant
+    entity_id: sensor.weather_humidex_windchill
+    id: weather_humidex
+    on_value:
+      - lvgl.label.update:
+          id: lbl_weather_humidex_number
+          text: !lambda |-
+            return id(weather_humidex).get_state();
+      - lvgl.label.update:
+          id: lbl_weather_humidex
+          text: !lambda |-
+            std::string action = id(weather_humidex).state;
+            if (action == "") {
+              return "";
+            } 
+            else {
+              return "Feel like";
+            }
+
+  #  CURRENT THERMOSTAT STATUS
+  - platform: homeassistant
+    entity_id: sensor.russell_thermostat_status
+    id: climate_current
+    on_value:
+      - lvgl.label.update:
+          id: lbl_climate_current
+          text: !lambda |-
+            return id(climate_current).get_state();
+  #  CURRENT THERMOSTAT STATUS COLOR
+  - platform: homeassistant
+    entity_id: climate.russell
+    attribute: hvac_action
+    id: climate_current_color
+    on_value:
+      - lvgl.label.update:
+          id: lbl_climate_current_color
+          text_color: !lambda |-
+            std::string action = id(climate_current_color).state;
+            if (action == "cooling") {
+              return lv_color_hex(0x1E90FF);  // Dodger Blue
+            } else if (action == "heating") {
+              return lv_color_hex(${color_red});  // Orange Red
+            } else {
+              return lv_color_hex(0x808080);  // Gray for idle, off, or unknown
+            }
+      - lvgl.label.update:
+          id: lbl_climate_hvac
+          text: !lambda |-
+            return id(climate_current_color).get_state();
+          text_color: !lambda |-
+            std::string action = id(climate_current_color).state;
+            if (action == "cooling") {
+              return lv_color_hex(0x1E90FF);  // Dodger Blue
+            } else if (action == "heating") {
+              return lv_color_hex(${color_red});  // Orange Red
+            } else {
+              return lv_color_hex(0x808080);  // Gray for idle, off, or unknown
+            }
+  # STATUS DOORS IMPORT FROM HELPER
+  - platform: homeassistant
+    entity_id: sensor.door_status
+    name: Status DOORS
+    id: doorstatus 
+    on_value: 
+      - lvgl.label.update: 
+          id: lbl_status_doors
+          text: !lambda |-
+            return id(doorstatus).get_state().c_str();
+          text_color: !lambda |-
+            std::string action = id(doorstatus).state;
+            if (action == "All doors closed") {
+              return lv_color_hex(${color_white});  // White
+            } else {
+              return lv_color_hex(${color_red});  // Red for open door
+            }          
+      - lvgl.label.update: 
+          id: lbl_status_doors_icon
+          text: !lambda |-
+            std::string action = id(doorstatus).state;
+            if (action == "All doors closed") { 
+              return "\U000F181E";
+            } else {
+              return "\U000F081C";
+            }
+          text_color: !lambda |-
+            std::string action = id(doorstatus).state;
+            if (action == "All doors closed") {
+              return lv_color_hex(${color_green});  // Green
+            } else {
+              return lv_color_hex(${color_red});  // Red for open door
+            }
+  #JF OCCUPANCY
+  - platform: homeassistant
+    entity_id: person.jf_champagne
+    id: jfstatus
+    on_value: 
+      then:
+        - lvgl.label.update: 
+            id: lbl_jf_status
+            text: !lambda |-
+              return " " + id(jfstatus).state;    
+
+  #  GARAGE DOOR - Enhanced with transition states
+  - platform: homeassistant
+    name: Garage Door Status
+    entity_id: cover.garage_ratgdo_door
+    id: garage_status
+    on_value:
+      - lambda: |-
+          ESP_LOGD("garage", "Cover state changed: %s", x.c_str());
+      # Update status text with better formatting
+      - lvgl.label.update:
+          id: lbl_garage_status
+          text: !lambda |-
+            std::string state = x;
+            if (state == "open") return "Open";
+            if (state == "opening") return "Opening...";
+            if (state == "closing") return "Closing...";
+            if (state == "closed") return "Closed";
+            return "Unknown";
+      # Update icon - animate during transitions
+      - lvgl.label.update:
+          id: lbl_garage_door
+          text: !lambda |-
+            std::string state = x;
+            // Use open icon for open/opening states
+            if (state == "open" || state == "opening") {
+              return "\U000F12D4";
+            }
+            // Use closed icon for closed/closing states
+            return "\U000F12D3";
+          text_color: !lambda |-
+            std::string state = x;
+            if (state == "open") {
+              return lv_color_hex(${color_red});  // Deep Red - fully open (danger)
+            } else if (state == "opening") {
+              return lv_color_hex(0xFF6F00);  // Amber - opening (caution)
+            } else if (state == "closing") {
+              return lv_color_hex(0xFFA000);  // Orange - closing (caution)
+            } else if (state == "closed") {
+              return lv_color_hex(${color_green});  // Deep Green - closed (safe)
+            }
+            return lv_color_hex(${color_grey});  // Gray - unknown
+
+
+
+#
+#              BINARY SENSORS
+#
+binary_sensor:
+  - platform: homeassistant
+    entity_id: binary_sensor.garage_ratgdo_obstruction
+    name: garage_ratgdo_obstruction
+    id: garageobstruction 
+    trigger_on_initial_state: True
+    on_state:
+      then:
+        - lvgl.label.update: 
+            id: lbl_garage_obstruction
+            text: !lambda |-
+              return std::string(id(garageobstruction).state ? "Obstruction" : "Garage Door");            
+  #  NIGHT MODE 
+  - platform: homeassistant
+    entity_id: input_boolean.nightmode
+    name: Night Mode 
+    id: nightmode 
+    on_state:
+      then:
+        - lvgl.widget.update: 
+            id: btn_nightmode
+            state: 
+                checked: !lambda return x;    
+        - lvgl.label.update: 
+            id: lbl_mode
+            text: !lambda |-
+              return std::string(id(nightmode).state ? "Night Mode" : "");    
+        - lvgl.label.update: 
+            id: lbl_mode_icon
+            text: !lambda |-
+              return std::string(id(nightmode).state ? "\U000F1B94" : "");    
+   # GUEST MODE 
+  - platform: homeassistant
+    entity_id: input_boolean.guestmode
+    name: Guest Mode 
+    id: guestmode 
+    on_state:
+      then:
+        - lvgl.widget.update: 
+            id: btn_guestmode
+            state: 
+                checked: !lambda return x;    
+   # CLEANING MODE 
+  - platform: homeassistant
+    entity_id: input_boolean.cleaningmode
+    name: Clean Mode 
+    id: cleanmode 
+    on_state:
+      then:
+        - lvgl.widget.update: 
+            id: btn_cleanmode
+            state: 
+                checked: !lambda return x;    

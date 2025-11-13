@@ -1,0 +1,90 @@
+output:
+  - platform: ledc
+    pin: 2
+    frequency: 1220
+    id: gpio_backlight_pwm
+
+i2c:
+  sda: GPIO19
+  scl: GPIO20
+  scan: true
+
+
+light:
+  - platform: monochromatic # Define a monochromatic, dimmable light for the backlight
+    output: gpio_backlight_pwm
+    name: Display Backlight
+    id: back_light
+    restore_mode: ALWAYS_ON
+    on_state:
+      - if:
+          condition:
+            lambda: "return id(back_light).remote_values.get_brightness() > 0;"
+          then:
+            - logger.log: "Backlight turned on via HA, restarting timeout"
+            - lvgl.resume
+            - lvgl.widget.redraw
+            - number.set:
+                id: display_timeout
+                value: !lambda "return id(display_timeout).state;"  # Reset timeout
+
+
+touchscreen:
+  platform: gt911
+  on_release:
+  - if:
+      condition: lvgl.is_paused
+      then:
+        - logger.log: "LVGL resuming"
+        - lvgl.resume:
+        - lvgl.widget.redraw:
+        - light.turn_on: back_light
+
+number:
+  - platform: template
+    name: Screen timeout
+    optimistic: true
+    id: display_timeout
+    unit_of_measurement: "s"
+    initial_value: 10
+    restore_value: true
+    min_value: 10
+    max_value: 180
+    step: 5
+    mode: box
+
+display:
+  - platform: rpi_dpi_rgb
+    id: main_display
+    color_order: RGB
+    invert_colors: True
+    update_interval: 5s
+    auto_clear_enabled: false
+    dimensions:
+      width: 800
+      height: 480
+    de_pin: 40
+    hsync_pin: 39
+    vsync_pin: 41
+    pclk_pin: 0
+    pclk_frequency: 12MHz
+    data_pins:
+      red:
+        - 45        #r1
+        - 48        #r2
+        - 47        #r3
+        - 21        #r4
+        - 14        #r5
+      green:
+        - 5         #g0
+        - 6         #g1
+        - 7         #g2
+        - 15        #g3
+        - 16        #g4
+        - 4         #g5
+      blue:
+        - 8         #b1
+        - 3         #b2
+        - 46        #b3
+        - 9         #b4
+        - 1         #b5
